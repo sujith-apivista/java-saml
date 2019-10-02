@@ -5,7 +5,12 @@
 Add SAML support to your Java applications using this library.
 Forget those complicated libraries and use that open source library provided and supported by OneLogin Inc.
 
-Version 2.X.X, compatible with java7 / java8.
+Version >= 2.5.0 compatible with java8 / java9. Not compatible with java7
+2.5.0 sets the 'strict' setting parameter to true.
+2.5.0 uses xmlsec 2.1.4 which fixes [CVE-2019-12400](https://snyk.io/vuln/SNYK-JAVA-ORGAPACHESANTUARIO-460281)
+
+
+Version 2.0.0 - 2.4.0, compatible with java7 / java8.
 
 We [introduced some incompatibilities](https://github.com/onelogin/java-saml/issues/90), that could be fixed and make it compatible with java6.
 
@@ -82,7 +87,7 @@ Install it as a maven dependency:
   <dependency>
       <groupId>com.onelogin</groupId>
       <artifactId>java-saml</artifactId>
-      <version>2.4.0</version>
+      <version>2.5.0</version>
   </dependency>
 ```
 
@@ -227,6 +232,9 @@ onelogin.saml2.sp.nameidformat = urn:oasis:names:tc:SAML:1.1:nameid-format:unspe
 # the certs folder. But we can also provide them with the following parameters
 
 onelogin.saml2.sp.x509cert =
+
+# Future SP certificate, to be used during SP Key roll over
+onelogin.saml2.sp.x509certNew =
 
 # Requires Format PKCS#8   BEGIN PRIVATE KEY       
 # If you have     PKCS#1   BEGIN RSA PRIVATE KEY  convert it by   openssl pkcs8 -topk8 -inform pem -nocrypt -in sp.rsa_key -outform pem -out sp.pem
@@ -393,11 +401,12 @@ We can set a 'returnTo' url parameter to the login function and that will be con
 String targetUrl = 'https://example.com';
 auth.login(returnTo=targetUrl)
 ```
-The login method can receive 4 more optional parameters:
+The login method can receive 5 more optional parameters:
 - *forceAuthn* When true the AuthNRequest will have the 'ForceAuthn' attribute set to 'true'
 - *isPassive* When true the AuthNRequest will have the 'Ispassive' attribute set to 'true'
 - *setNameIdPolicy* When true the AuthNRequest will set a nameIdPolicy element.
 - *stay* Set to true to stay (returns the url string), otherwise set to false to execute a redirection to that url (IdP SSO URL)
+- *nameIdValueReq* Indicates to the IdP the subject that should be authenticated
 
 By default, the login method initiates a redirect to the SAML Identity Provider. You can use the *stay* parameter, to prevent that, and execute the redirection manually. We need to use that if a match on the future SAMLResponse ID and the AuthNRequest ID to be sent is required.  That AuthNRequest ID must be extracted and stored for future validation, so we can't execute the redirection on the login.  Instead, set *stay* to true, then get that ID by
 ```
